@@ -1,0 +1,6 @@
+# Maybe we have those lying around...
+*.gem
+
+# DIY, please :)
+doc
+.yardoc
