@@ -19,6 +19,4 @@ EOD
 	s.license = "GPLv3+"
 
 	s.files = %w(README) + Dir["lib/*.rb"] + Dir["lib/**/*.rb"]
-
-	s.add_dependency "rubygems"
 end
