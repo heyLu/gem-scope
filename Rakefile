@@ -14,8 +14,14 @@ task :test do
 	end
 end
 
+desc "Generate (yar)docs"
+task :doc do
+	`yardoc`
+end
+
 desc "Clean all generated files"
 task :clobber do
 	require 'fileutils'
-	FileUtils.rm_rf Dir["gem-scope-*.gem"]
+	FileUtils.rm_f Dir["gem-scope-*.gem"]
+	FileUtils.rm_rf "doc"
 end

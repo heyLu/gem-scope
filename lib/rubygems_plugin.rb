@@ -1,11 +1,16 @@
 require 'rubygems/command_manager'
 
+# Adjust GEM_HOME and GEM_PATH to support scoping.
+#
+# @todo Accept things from standard paths, too?
 class Scope
 	attr_reader :base, :env
 
-	def initialize env="shine"
+	# Use a new scope.
+	#  @attr scope the scope to use
+	def initialize scope="shine"
 		@base = File.join ENV['HOME'], ".gems"
-		@env = "shine"
+		@scope = scope
 
 		Dir.mkdir @base unless File.exist? @base
 		Dir.mkdir cur unless File.exist? cur
@@ -19,12 +24,14 @@ class Scope
 		Gem::clear_paths
 	end
 
-	# @returns the path to the current environment
+	# The path to the currently used scope directory.
+	# @return The path in which all availlable gems are
 	def cur
-		File.join @base, @env
+		File.join @base, @scope
 	end
 end
 
+# Dead simple `gem scope` command support.
 class ScopeCommand < Gem::Command
 	def initialize
 		super 'scope', "Scoping for RubyGems."
