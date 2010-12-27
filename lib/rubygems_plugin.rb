@@ -1,4 +1,5 @@
 require 'rubygems/command_manager'
+require 'rubygems/defaults'
 require 'gem/scope'
 
 # Dead simple `gem scope` command.
@@ -15,20 +16,32 @@ class ScopeCommand < Gem::Command
 		<<-EOD
 Scoping adds the ability to RubyGems to `scope` gems. That is,
 only making Gems availlable in a controlled environment.
+
+list - List all scopes ('*' is current). Think `git branch`.
 EOD
 	end
 
 	def execute
 		args = options[:args]
 		case args.first
-		when ''
 		when 'list'
-			puts Dir["#{@scope.base}/*"]
-		when /.*/
-			puts $1
+			scopes
+		when /(.+)/
+			change_or_create $1
+		else
+			scopes
 		end
+	end
+
+	def scopes
+		puts @scope.scopes.map { |s| s==@scope.scope ? " * #{s}" : "   #{s}" }
+	end
+
+	def change_or_create s
+		@scope.create s if not @scope.scopes.include? s
+		@scope.scope! s
 	end
 end
 
-Gem::Scope.new "shine", Gem::default_path # don't like this one
+Gem::Scope.new # don't like this one
 Gem::CommandManager.instance.register_command :scope

@@ -1,4 +1,5 @@
 require 'rubygems/defaults'
+require 'fileutils'
 
 # Adds 'scoping' to RubyGems by means of adjusting
 # GEM_HOME and GEM_PATH to only detect the gems in
@@ -8,23 +9,31 @@ require 'rubygems/defaults'
 #   whereas `GEM_PATH` is searched for gems.
 # @todo Accept things from standard paths, too?
 class Gem::Scope
-	attr_reader :base, :scope, :searched
+	attr_reader :base, :searched
+	attr_accessor :scope
 
 	# Use a new scope.
 	#  @attr scope the scope to use
 	def initialize scope="shine", searched=[]
 		@base = File.join ENV['HOME'], ".gems"
-		@scope = scope
+		@scope = if File.exist? File.join(@base,"current")
+			File.basename File.realpath(File.join @base, "current" )
+		else
+			scope
+		end
 		@searched ||= searched
 
 		Dir.mkdir @base unless File.exist? @base
 		Dir.mkdir install unless File.exist? install
 
-		rescope
+		scope!
 	end
 
-	# recalculate the scope
-	def rescope
+	# Reinitialize the scope
+	def scope! another=@scope
+		return if @scope == "all" && another == "all"
+
+		@scope = another
 		ENV['GEM_HOME'] = install
 		ENV['GEM_PATH'] = if @searched.empty?
 			install
@@ -32,14 +41,36 @@ class Gem::Scope
 			[@searched,install].flatten.join ':'
 		end
 		Gem::clear_paths
+
+		return if fine?
+		puts "Changing scope to #{another}" #if $DEBUG
+
+		FileUtils.rm_f File.join(@base, "current") # required?
+		FileUtils.ln_sf install+'/', File.join(@base, "current")
 	end
 
+	# create a new scope
+	def create s
+		Dir::mkdir File.join @base, s
+		@scope = s
+	end
+
+	def scopes
+		Dir["#{@base}/*"].map{ |s|
+			File.basename s unless File.basename(s)=="current"
+		}.compact
+	end
+
+	# Execute a {Proc#call} in the context of this scope. Not really
+	# for the big things. Just for scripts and all that.
+	#
+	# @param block What you want to do.
 	def do &block
-		rescope
+		scope!
 		if block_given?
 			block.call
 		else
-			`#{block}`
+			`#{block}` # uh-oh
 		end
 	end
 
@@ -55,7 +86,17 @@ class Gem::Scope
 	# Add an additional scope to the search path (`GEM_PATH`).
 	def add scope
 		@searched += scope
-		rescope
+		scope!
 	end
 	alias :+ :add
+
+ private
+
+	def fine?
+		if @scope==File.basename(File.realpath(File.join @base, "current"))
+			true
+		else
+			false
+		end
+	end
 end
