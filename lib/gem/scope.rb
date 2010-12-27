@@ -22,7 +22,7 @@ class Gem::Scope
 	def initialize scope="shine", searched=[]
 		@base = File.join ENV['HOME'], ".gems"
 		@scope = if File.exist? File.join(@base,"current")
-			File.basename File.realpath(File.join @base, "current" )
+			File.basename File.realpath(cur_link)
 		else
 			scope
 		end
@@ -30,6 +30,7 @@ class Gem::Scope
 
 		Dir.mkdir @base unless File.exist? @base
 		Dir.mkdir install unless File.exist? install
+		FileUtils.ln_sf install+'/', cur_link unless File.exist? cur_link
 
 		scope!
 	end
@@ -50,8 +51,8 @@ class Gem::Scope
 		return if fine?
 		puts "Changing scope to #{another}" #if $DEBUG
 
-		FileUtils.rm_f File.join(@base, "current") # required?
-		FileUtils.ln_sf install+'/', File.join(@base, "current")
+		FileUtils.rm_f cur_link # required?
+		FileUtils.ln_sf install+'/', cur_link
 	end
 
 	# create a new scope
@@ -99,8 +100,10 @@ class Gem::Scope
 
  private
 
+	def cur_link; File.join @base, "current" end
+
 	def fine?
-		if @scope==File.basename(File.realpath(File.join @base, "current"))
+		if @scope==File.basename(File.realpath cur_link )
 			true
 		else
 			false
