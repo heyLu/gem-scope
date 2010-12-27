@@ -13,7 +13,12 @@ class Gem::Scope
 	attr_accessor :scope
 
 	# Use a new scope.
-	#  @attr scope the scope to use
+	#
+	# @param scope
+	#   The scope to use.
+	# @note If there is a `current` symlink in the {#base}
+	#   path, that one will be used instead of {#scope}.
+	#   So that parameter might go away soonish.
 	def initialize scope="shine", searched=[]
 		@base = File.join ENV['HOME'], ".gems"
 		@scope = if File.exist? File.join(@base,"current")
@@ -55,6 +60,7 @@ class Gem::Scope
 		@scope = s
 	end
 
+	# @return A list of the scopes that exist currently.
 	def scopes
 		Dir["#{@base}/*"].map{ |s|
 			File.basename s unless File.basename(s)=="current"
@@ -78,6 +84,7 @@ class Gem::Scope
 	# where most Gems should be.
 	# If you want to use more than one scope, use {#add} and
 	# `GEM_PATH` respectively.
+	#
 	# @return The path in which all availlable gems are
 	def install
 		File.join @base, @scope
