@@ -9,6 +9,8 @@ Gem::Specification.new do |s|
 It is similar in spirit to [rip](https://github.com/defunkt/rip)
 although designed to be a drop-in beauty.
 Simple, less features, whatever. Enjoy if you like :)
+
+It has *no* dependencies :) (other than rubygems, admittedly)
 EOD
 
 	s.authors = "Lucas Stadler"
@@ -17,4 +19,6 @@ EOD
 	s.license = "GPLv3+"
 
 	s.files = %w(README) + Dir["lib/*.rb"]
+
+	s.add_dependency "rubygems"
 end
