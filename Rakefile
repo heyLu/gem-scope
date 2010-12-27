@@ -23,5 +23,5 @@ desc "Clean all generated files"
 task :clobber do
 	require 'fileutils'
 	FileUtils.rm_f Dir["gem-scope-*.gem"]
-	FileUtils.rm_rf "doc"
+	FileUtils.rm_rf ["doc", ".yardoc"]
 end
