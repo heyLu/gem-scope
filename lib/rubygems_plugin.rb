@@ -6,7 +6,7 @@ require 'gem/scope'
 class ScopeCommand < Gem::Command
 	def initialize
 		super 'scope', "Scoping for RubyGems."
-		@scope = Scope.new
+		@scope = Gem::Scope.new
 	end
 
 	def usage; "[SCOPE] - a scope to operate in" end
@@ -30,5 +30,5 @@ EOD
 	end
 end
 
-Scope.new # don't like this one
+Gem::Scope.new "shine", Gem::default_path # don't like this one
 Gem::CommandManager.instance.register_command :scope
