@@ -19,7 +19,7 @@ class Gem::Scope
 	# @note If there is a `current` symlink in the {#base}
 	#   path, that one will be used instead of {#scope}.
 	#   So that parameter might go away soonish.
-	def initialize scope="shine", searched=[]
+	def initialize scope="all", searched=[]
 		@base = File.join ENV['HOME'], ".gems"
 		@scope = if File.exist? File.join(@base,"current")
 			File.basename File.realpath(cur_link)
