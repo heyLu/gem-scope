@@ -30,12 +30,13 @@ class Gem::Scope
 
 		Dir.mkdir @base unless File.exist? @base
 		Dir.mkdir install unless File.exist? install
-		FileUtils.ln_sf install+'/', cur_link unless File.exist? cur_link
 
 		scope!
 	end
 
 	# Reinitialize the scope
+	#
+	# @param another Defaults to the current {scope}
 	def scope! another=@scope
 		return if @scope == "all" && another == "all"
 
@@ -49,10 +50,9 @@ class Gem::Scope
 		Gem::clear_paths
 
 		return if fine?
-		puts "Changing scope to #{another}" #if $DEBUG
+		puts "Changing scope to #{another}" if $VERBOSE
 
-		FileUtils.rm_f cur_link # required?
-		FileUtils.ln_sf install+'/', cur_link
+		puts "Relinked" if relink? && $VERBOSE
 	end
 
 	# create a new scope
@@ -100,13 +100,18 @@ class Gem::Scope
 
  private
 
+	# Name of the link to the current scope.
 	def cur_link; File.join @base, "current" end
 
-	def fine?
-		if @scope==File.basename(File.realpath cur_link )
-			true
-		else
-			false
+	# Recreates the link to the currently active scope if it does not
+	# exist yet.
+	def relink?
+		unless File.exist?(cur_link) && fine?
+			FileUtils.rm_f cur_link # required?
+			FileUtils.ln_sf install, cur_link
 		end
 	end
+
+	# Check if the `current` link and the should-be scope are equivalent.
+	def fine?; @scope==File.basename(File.realpath cur_link ) end
 end
