@@ -1,6 +1,6 @@
 task :default => :test
 
-desc "Create the gem. Ready for deploying"
+desc "Create the gem"
 task :gem do
 	`gem build gem-scope.gemspec`
 end
