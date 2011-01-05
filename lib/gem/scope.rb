@@ -9,6 +9,8 @@ require 'fileutils'
 #   whereas `GEM_PATH` is searched for gems.
 # @todo Accept things from standard paths, too?
 class Gem::Scope
+	VERSION = "0.0.1"
+
 	attr_reader :base, :searched
 	attr_accessor :scope
 
@@ -29,7 +31,7 @@ class Gem::Scope
 		@searched ||= searched
 
 		Dir.mkdir @base unless File.exist? @base
-		Dir.mkdir install unless File.exist? install
+		create?
 
 		scope!
 	end
@@ -49,6 +51,9 @@ class Gem::Scope
 		end
 		Gem::clear_paths
 
+#		puts "self linked" if self_link?
+
+		create?
 		return if fine?
 		puts "Changing scope to #{another}" if $VERBOSE
 
@@ -103,15 +108,26 @@ class Gem::Scope
 	# Name of the link to the current scope.
 	def cur_link; File.join @base, "current" end
 
+	# Create {#install} if it does not exist yet
+	def create?; Dir.mkdir install unless File.exist? install end
+
 	# Recreates the link to the currently active scope if it does not
 	# exist yet.
 	def relink?
-		unless File.exist?(cur_link) && fine?
-			FileUtils.rm_f cur_link # required?
-			FileUtils.ln_sf install, cur_link
-		end
+		return if File.exist?(cur_link) && fine?
+
+		FileUtils.rm_f cur_link # required?
+		FileUtils.ln_sf install, cur_link
 	end
 
 	# Check if the `current` link and the should-be scope are equivalent.
 	def fine?; @scope==File.basename(File.realpath cur_link ) end
+
+#	def link_to_self; File.join install, "gem-scope-#{VERSION}" end
+#
+#	def self_link?
+#		return false unless File.exist? link_to_self
+#		residence = File.join File.dirname(__FILE__), "../../"
+#		FileUtils.ln_sf link_to_self, residence
+#	end
 end
