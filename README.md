@@ -23,6 +23,15 @@ not-so-funny things with your precious jewelry, just issue
 `gem scope all` and all will be well. (Be sure to report such an
 unlikely and sad event, though. I'll help you, too!)
 
+## Features & Caveats
+
+	+ minimal set of features
+	+ `gem install gem-scope` and you're happy (no .bashrc stuff)
+
+	- doesn't handle conflicts between executables
+	- no spec's
+	- no real API
+
 ## **Warning!**
 
 This is really _overly simplified software_ don't use it if you're
