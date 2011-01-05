@@ -1,31 +1,36 @@
+require 'minitest/autorun'
+require 'minitest/pride'
+
+$:.unshift "lib"
 require 'gem/scope'
 
-include Gem
-
-describe "The funny Scope" do
+describe Gem::Scope do
 	before do
-		@scope = Scope.new
+		@link = File.join(ENV['HOME'], ".gems/current")
+		@oldpath = File.realpath @link
+		@scope = Gem::Scope.new
+		@scope.scope = "default"
 	end
 
-	it "should set GEM_HOME" do
-		ENV['GEM_HOME'].should.not.be.empty
+	it "exports the scope as an attribute" do
+		refute_nil @scope.scope
+		@scope.scope.must_equal "default"
 	end
 
-	it "should use all Gems by default (as rubygems plugin)" do
-		require_relative '../lib/rubygems_plugin.rb'
-		ENV['GEM_PATH'].should.match /#{Regexp.escape Gem::default_path.join ':'}/
+	it "should set GEM_HOME on #scope!" do
+		@scope.scope!
+		refute_nil ENV['GEM_HOME']
+		ENV['GEM_HOME'].must_equal @scope.install
 	end
 
-	it "should set GEM_PATH to GEM_HOME otherwise" do
-		ENV['GEM_PATH'].should.equal ENV['GEM_HOME']
+	it "points 'current' to the current scope" do
+		@scope.scope!
+		File.realpath(@link).must_equal File.join(ENV['HOME'], ".gems/#{@scope.scope}")
 	end
 
-	it "should support specifying a scope on creation" do
-		Scope.new("non-default").scope.should.equal "non-default"
-	end
-
-	it "should not find gems in empty scopes" do
-		s = Scope.new "potentially-empty-scope"
-		s.do { `gem list` }.should.equal "\n"
+	# restore state
+	after do
+		FileUtils.rm_f @link
+		FileUtils.ln_sf @oldpath, @link
 	end
 end
